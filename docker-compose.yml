@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  techtestpayment.api:
+    image: ${DOCKER_REGISTRY-}techtestpaymentapi
+    build:
+      context: .
+      dockerfile: TechTestPayment.Api/Dockerfile
+    depends_on:
+        - sqlserver
+    ports: 
+        - "443:443"
+        - "80:80"
+    environment:
+        - ConnectionStrings__SqlServer=Server=sqlserver;Database=tech-test-payment;User Id=SA;Password=TestsOnlyPasswordPottencial123!;Encrypt=False;TrustServerCertificate=True
+        - Migrate=true 
+    networks:
+      - api-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'TestsOnlyPasswordPottencial123!'
+      MSSQL_PID: 'Developer'
+    ports:
+      - '1433:1433'
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - api-network
+
+volumes:
+  sqlserver-data:
+
+networks:
+  api-network:
+    driver: bridge 

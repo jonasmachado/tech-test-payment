@@ -1,0 +1,740 @@
+{
+	"info": {
+		"_postman_id": "3ab03c6f-0d37-4e78-9df7-fda3b8b55ba7",
+		"name": "Pottencial Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6787772"
+	},
+	"item": [
+		{
+			"name": "Happy Path",
+			"item": [
+				{
+					"name": "Create Seller",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateCPF() {\r",
+									"    let sum = 0;\r",
+									"    let remainder;\r",
+									"    let generatedCPF = '';\r",
+									"\r",
+									"    // Gerar os primeiros 9 dígitos de forma aleatória e calcular os dois dígitos verificadores\r",
+									"    for (let i = 1; i <= 9; i++) {\r",
+									"        const digit = Math.floor(Math.random() * 9);\r",
+									"        generatedCPF += digit.toString();\r",
+									"        sum += digit * (11 - i);\r",
+									"    }\r",
+									"\r",
+									"    // Cálculo do primeiro dígito verificador\r",
+									"    remainder = (sum * 10) % 11;\r",
+									"    if (remainder == 10 || remainder == 11) remainder = 0;\r",
+									"    generatedCPF += remainder.toString();\r",
+									"\r",
+									"    // Resetar soma para o segundo dígito verificador\r",
+									"    sum = 0;\r",
+									"    for (let i = 1; i <= 10; i++) {\r",
+									"        sum += parseInt(generatedCPF.charAt(i - 1)) * (12 - i);\r",
+									"    }\r",
+									"\r",
+									"    // Cálculo do segundo dígito verificador\r",
+									"    remainder = (sum * 10) % 11;\r",
+									"    if (remainder == 10 || remainder == 11) remainder = 0;\r",
+									"    generatedCPF += remainder.toString();\r",
+									"\r",
+									"    return generatedCPF;\r",
+									"}\r",
+									"\r",
+									"function generateMinasGeraisPhoneNumber() {\r",
+									"    const ddds = [31, 32, 33, 34, 35, 37, 38]; // DDDs de Minas Gerais\r",
+									"    const ddd = ddds[Math.floor(Math.random() * ddds.length)]; // Seleciona um DDD aleatório\r",
+									"    let phoneNumber = ddd.toString();\r",
+									"\r",
+									"    // Gerar os 9 dígitos do número (iniciando com 9 para celulares)\r",
+									"    phoneNumber += '9'; // Primeiro dígito dos celulares é sempre 9\r",
+									"    for (let i = 0; i < 8; i++) {\r",
+									"        phoneNumber += Math.floor(Math.random() * 10).toString();\r",
+									"    }\r",
+									"\r",
+									"    return phoneNumber;\r",
+									"}\r",
+									"\r",
+									"// Salvar o CPF gerado em uma variável de ambiente\r",
+									"pm.environment.set(\"randomCPF\", generateCPF());\r",
+									"\r",
+									"// Salvar o número de telefone gerado em uma variável global\r",
+									"pm.environment.set(\"randomMGPhoneNumber\", generateMinasGeraisPhoneNumber());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"sellerId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cpf\": \"{{randomCPF}}\",\r\n  \"nome\": \"{{$randomFullName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"phone\": \"{{randomMGPhoneNumber}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Sellers",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Sellers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"productId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomProductName}}\",\r\n  \"remaining\": 10000,\r\n  \"price\": 19.50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Products",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"orderId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"sellerId\": {{sellerId}},\r\n  \"items\": [\r\n    {\r\n      \"id\": {{productId}},\r\n      \"amount\": 7\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/Orders?id={{orderId}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order to Payment Approved",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code must be Ok\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": {{orderId}},\r\n  \"status\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order to Sent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code must be Ok\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": {{orderId}},\r\n  \"status\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order to Delivered",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code must be Ok\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": {{orderId}},\r\n  \"status\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Final Order Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"\r",
+									"pm.test(\"Final status must be 'Delivered'\", function () {\r",
+									"    pm.expect(responseData.status).to.equal(\"Delivered\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/Orders?id={{orderId}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Invalid Status Transition",
+			"item": [
+				{
+					"name": "Create Seller",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateCPF() {\r",
+									"    let sum = 0;\r",
+									"    let remainder;\r",
+									"    let generatedCPF = '';\r",
+									"\r",
+									"    // Gerar os primeiros 9 dígitos de forma aleatória e calcular os dois dígitos verificadores\r",
+									"    for (let i = 1; i <= 9; i++) {\r",
+									"        const digit = Math.floor(Math.random() * 9);\r",
+									"        generatedCPF += digit.toString();\r",
+									"        sum += digit * (11 - i);\r",
+									"    }\r",
+									"\r",
+									"    // Cálculo do primeiro dígito verificador\r",
+									"    remainder = (sum * 10) % 11;\r",
+									"    if (remainder == 10 || remainder == 11) remainder = 0;\r",
+									"    generatedCPF += remainder.toString();\r",
+									"\r",
+									"    // Resetar soma para o segundo dígito verificador\r",
+									"    sum = 0;\r",
+									"    for (let i = 1; i <= 10; i++) {\r",
+									"        sum += parseInt(generatedCPF.charAt(i - 1)) * (12 - i);\r",
+									"    }\r",
+									"\r",
+									"    // Cálculo do segundo dígito verificador\r",
+									"    remainder = (sum * 10) % 11;\r",
+									"    if (remainder == 10 || remainder == 11) remainder = 0;\r",
+									"    generatedCPF += remainder.toString();\r",
+									"\r",
+									"    return generatedCPF;\r",
+									"}\r",
+									"\r",
+									"function generateMinasGeraisPhoneNumber() {\r",
+									"    const ddds = [31, 32, 33, 34, 35, 37, 38]; // DDDs de Minas Gerais\r",
+									"    const ddd = ddds[Math.floor(Math.random() * ddds.length)]; // Seleciona um DDD aleatório\r",
+									"    let phoneNumber = ddd.toString();\r",
+									"\r",
+									"    // Gerar os 9 dígitos do número (iniciando com 9 para celulares)\r",
+									"    phoneNumber += '9'; // Primeiro dígito dos celulares é sempre 9\r",
+									"    for (let i = 0; i < 8; i++) {\r",
+									"        phoneNumber += Math.floor(Math.random() * 10).toString();\r",
+									"    }\r",
+									"\r",
+									"    return phoneNumber;\r",
+									"}\r",
+									"\r",
+									"// Salvar o CPF gerado em uma variável de ambiente\r",
+									"pm.environment.set(\"randomCPF\", generateCPF());\r",
+									"\r",
+									"// Salvar o número de telefone gerado em uma variável global\r",
+									"pm.environment.set(\"randomMGPhoneNumber\", generateMinasGeraisPhoneNumber());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"sellerId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cpf\": \"{{randomCPF}}\",\r\n  \"nome\": \"{{$randomFullName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"phone\": \"{{randomMGPhoneNumber}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Sellers",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Sellers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"productId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomProductName}}\",\r\n  \"remaining\": 10000,\r\n  \"price\": 19.50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Products",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // Pega a resposta como JSON\r",
+									"pm.environment.set(\"orderId\", responseData.id);\r",
+									"\r",
+									"pm.test(\"Response status code must be Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"sellerId\": {{sellerId}},\r\n  \"items\": [\r\n    {\r\n      \"id\": {{productId}},\r\n      \"amount\": 7\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/Orders?id={{orderId}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order to Delivered",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code must be 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": {{orderId}},\r\n  \"status\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{endpoint}}/Orders",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Final Order Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); \r",
+									"\r",
+									"pm.test(\"Final status must be 'Delivered'\", function () {\r",
+									"    pm.expect(responseData.status).to.equal(\"WaitingPayment\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{endpoint}}/Orders?id={{orderId}}",
+							"host": [
+								"{{endpoint}}"
+							],
+							"path": [
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
